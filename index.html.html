@@ -1,0 +1,655 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CGPA Calculator App</title>
+    <style>
+        body {
+            box-sizing: border-box;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            margin: 0;
+            padding: 0;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+
+        .app-container {
+            max-width: 500px;
+            margin: 0 auto;
+            background: white;
+            min-height: 100vh;
+            position: relative;
+            box-shadow: 0 0 20px rgba(0,0,0,0.1);
+        }
+
+        .header {
+            background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
+            color: white;
+            padding: 20px;
+            text-align: center;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .header h1 {
+            margin: 0;
+            font-size: 1.8rem;
+            font-weight: 700;
+        }
+
+        .header p {
+            margin: 8px 0 0 0;
+            opacity: 0.9;
+            font-size: 0.9rem;
+        }
+
+        .back-btn {
+            position: absolute;
+            left: 20px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: rgba(255,255,255,0.2);
+            border: none;
+            color: white;
+            padding: 8px 12px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 1.2rem;
+            transition: all 0.2s ease;
+        }
+
+        .back-btn:hover {
+            background: rgba(255,255,255,0.3);
+        }
+
+        .dashboard {
+            padding: 20px;
+        }
+
+        .cgpa-card {
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            color: white;
+            padding: 25px;
+            border-radius: 20px;
+            text-align: center;
+            margin-bottom: 25px;
+            box-shadow: 0 8px 25px rgba(16, 185, 129, 0.3);
+        }
+
+        .cgpa-value {
+            font-size: 3rem;
+            font-weight: 800;
+            margin: 0;
+            line-height: 1;
+        }
+
+        .cgpa-label {
+            font-size: 1.1rem;
+            opacity: 0.9;
+            margin: 8px 0 0 0;
+        }
+
+        .cgpa-stats {
+            display: flex;
+            justify-content: space-around;
+            margin-top: 15px;
+            padding-top: 15px;
+            border-top: 1px solid rgba(255,255,255,0.3);
+        }
+
+        .cgpa-stat {
+            text-align: center;
+        }
+
+        .cgpa-stat-value {
+            font-size: 1.3rem;
+            font-weight: 700;
+            margin: 0;
+        }
+
+        .cgpa-stat-label {
+            font-size: 0.8rem;
+            opacity: 0.8;
+            margin: 2px 0 0 0;
+        }
+
+        .semesters-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+        }
+
+        .semester-card {
+            background: white;
+            border-radius: 15px;
+            padding: 20px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: 2px solid transparent;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .semester-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+            border-color: #4f46e5;
+        }
+
+        .semester-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: var(--semester-color);
+        }
+
+        .semester-card.sem-1::before { background: #ef4444; }
+        .semester-card.sem-2::before { background: #f97316; }
+        .semester-card.sem-3::before { background: #eab308; }
+        .semester-card.sem-4::before { background: #22c55e; }
+        .semester-card.sem-5::before { background: #06b6d4; }
+        .semester-card.sem-6::before { background: #3b82f6; }
+        .semester-card.sem-7::before { background: #8b5cf6; }
+        .semester-card.sem-8::before { background: #ec4899; }
+
+        .semester-number {
+            font-size: 0.9rem;
+            font-weight: 600;
+            color: #6b7280;
+            margin: 0 0 8px 0;
+        }
+
+        .semester-gpa {
+            font-size: 2rem;
+            font-weight: 800;
+            color: #1f2937;
+            margin: 0;
+            line-height: 1;
+        }
+
+        .semester-info {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 12px;
+            font-size: 0.8rem;
+            color: #6b7280;
+        }
+
+        .semester-view {
+            display: none;
+            padding: 20px;
+        }
+
+        .semester-view.active {
+            display: block;
+        }
+
+        .semester-header {
+            background: #f8fafc;
+            padding: 20px;
+            border-radius: 15px;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        .semester-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #1f2937;
+            margin: 0 0 8px 0;
+        }
+
+        .semester-gpa-display {
+            font-size: 2.5rem;
+            font-weight: 800;
+            color: #4f46e5;
+            margin: 0;
+        }
+
+        .add-subject-form {
+            background: #f8fafc;
+            border-radius: 15px;
+            padding: 20px;
+            margin-bottom: 20px;
+            border: 2px solid #e2e8f0;
+        }
+
+        .form-title {
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: #374151;
+            margin: 0 0 15px 0;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        .form-group label {
+            display: block;
+            font-weight: 600;
+            color: #374151;
+            margin-bottom: 6px;
+            font-size: 0.9rem;
+        }
+
+        .form-group input, .form-group select {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e5e7eb;
+            border-radius: 10px;
+            font-size: 1rem;
+            transition: all 0.2s ease;
+            background: white;
+            box-sizing: border-box;
+        }
+
+        .form-group input:focus, .form-group select:focus {
+            outline: none;
+            border-color: #4f46e5;
+            box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1);
+        }
+
+        .add-subject-btn {
+            background: #10b981;
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            border-radius: 10px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            font-size: 1rem;
+            width: 100%;
+        }
+
+        .add-subject-btn:hover {
+            background: #059669;
+        }
+
+        .subjects-list {
+            margin-top: 20px;
+        }
+
+        .subject-item {
+            background: white;
+            border-radius: 12px;
+            padding: 18px;
+            margin-bottom: 12px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            border-left: 4px solid #4f46e5;
+        }
+
+        .subject-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 10px;
+        }
+
+        .subject-name {
+            font-weight: 600;
+            color: #1f2937;
+            font-size: 1.1rem;
+            flex: 1;
+        }
+
+        .subject-grade {
+            background: #4f46e5;
+            color: white;
+            padding: 6px 12px;
+            border-radius: 8px;
+            font-weight: 700;
+            font-size: 0.9rem;
+        }
+
+        .subject-details {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            color: #6b7280;
+            font-size: 0.9rem;
+        }
+
+        .subject-credits {
+            font-weight: 500;
+        }
+
+        .remove-subject-btn {
+            background: #ef4444;
+            color: white;
+            border: none;
+            padding: 6px 10px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.8rem;
+            font-weight: 600;
+        }
+
+        .remove-subject-btn:hover {
+            background: #dc2626;
+        }
+
+        .empty-subjects {
+            text-align: center;
+            padding: 40px 20px;
+            color: #6b7280;
+        }
+
+        .empty-subjects h3 {
+            margin: 0 0 8px 0;
+            color: #374151;
+        }
+
+        @media (min-width: 768px) {
+            .app-container {
+                max-width: 600px;
+            }
+            
+            .semesters-grid {
+                grid-template-columns: repeat(3, 1fr);
+            }
+        }
+
+        @media (min-width: 1024px) {
+            .app-container {
+                max-width: 800px;
+            }
+            
+            .semesters-grid {
+                grid-template-columns: repeat(4, 1fr);
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="app-container">
+        <div class="header">
+            <button class="back-btn" id="backBtn" style="display: none;" onclick="showDashboard()">←</button>
+            <h1 id="headerTitle">CGPA Calculator</h1>
+            <p id="headerSubtitle">Track your academic progress</p>
+        </div>
+
+        <!-- Dashboard View -->
+        <div class="dashboard" id="dashboardView">
+            <div class="cgpa-card">
+                <h2 class="cgpa-value" id="overallCGPA">0.00</h2>
+                <p class="cgpa-label">Overall CGPA</p>
+                <div class="cgpa-stats">
+                    <div class="cgpa-stat">
+                        <h3 class="cgpa-stat-value" id="totalSubjects">0</h3>
+                        <p class="cgpa-stat-label">Total Subjects</p>
+                    </div>
+                    <div class="cgpa-stat">
+                        <h3 class="cgpa-stat-value" id="totalCredits">0</h3>
+                        <p class="cgpa-stat-label">Total Credits</p>
+                    </div>
+                    <div class="cgpa-stat">
+                        <h3 class="cgpa-stat-value" id="completedSemesters">0</h3>
+                        <p class="cgpa-stat-label">Completed</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="semesters-grid" id="semestersGrid">
+                <!-- Semester cards will be generated here -->
+            </div>
+        </div>
+
+        <!-- Semester View -->
+        <div class="semester-view" id="semesterView">
+            <div class="semester-header">
+                <h2 class="semester-title" id="currentSemesterTitle">Semester 1</h2>
+                <h3 class="semester-gpa-display" id="currentSemesterGPA">0.00</h3>
+            </div>
+
+            <div class="add-subject-form">
+                <h3 class="form-title">Add New Subject</h3>
+                <form id="subjectForm">
+                    <div class="form-group">
+                        <label for="subjectName">Subject Name</label>
+                        <input type="text" id="subjectName" placeholder="e.g., Mathematics" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="subjectCredits">Credits</label>
+                        <input type="number" id="subjectCredits" min="0.5" max="10" step="0.5" placeholder="3" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="subjectGrade">Grade</label>
+                        <select id="subjectGrade" required>
+                            <option value="">Select Grade</option>
+                            <option value="4.0">A+ (4.0)</option>
+                            <option value="4.0">A (4.0)</option>
+                            <option value="3.7">A- (3.7)</option>
+                            <option value="3.3">B+ (3.3)</option>
+                            <option value="3.0">B (3.0)</option>
+                            <option value="2.7">B- (2.7)</option>
+                            <option value="2.3">C+ (2.3)</option>
+                            <option value="2.0">C (2.0)</option>
+                            <option value="1.7">C- (1.7)</option>
+                            <option value="1.3">D+ (1.3)</option>
+                            <option value="1.0">D (1.0)</option>
+                            <option value="0.0">F (0.0)</option>
+                        </select>
+                    </div>
+                    <button type="submit" class="add-subject-btn">Add Subject</button>
+                </form>
+            </div>
+
+            <div class="subjects-list" id="subjectsList">
+                <div class="empty-subjects">
+                    <h3>No subjects added yet</h3>
+                    <p>Add your first subject above</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Data structure to store all semesters
+        let semesters = {};
+        let currentSemester = 1;
+        let subjectIdCounter = 1;
+
+        // Initialize 8 semesters
+        for (let i = 1; i <= 8; i++) {
+            semesters[i] = [];
+        }
+
+        // Grade mapping
+        const gradeLetters = {
+            '4.0': 'A',
+            '3.7': 'A-',
+            '3.3': 'B+',
+            '3.0': 'B',
+            '2.7': 'B-',
+            '2.3': 'C+',
+            '2.0': 'C',
+            '1.7': 'C-',
+            '1.3': 'D+',
+            '1.0': 'D',
+            '0.0': 'F'
+        };
+
+        // DOM elements
+        const dashboardView = document.getElementById('dashboardView');
+        const semesterView = document.getElementById('semesterView');
+        const backBtn = document.getElementById('backBtn');
+        const headerTitle = document.getElementById('headerTitle');
+        const headerSubtitle = document.getElementById('headerSubtitle');
+        const subjectForm = document.getElementById('subjectForm');
+
+        // Initialize the app
+        function initializeApp() {
+            generateSemesterCards();
+            updateDashboard();
+            showDashboard();
+        }
+
+        // Generate semester cards
+        function generateSemesterCards() {
+            const grid = document.getElementById('semestersGrid');
+            grid.innerHTML = '';
+
+            for (let i = 1; i <= 8; i++) {
+                const card = document.createElement('div');
+                card.className = `semester-card sem-${i}`;
+                card.onclick = () => showSemester(i);
+                
+                const gpa = calculateSemesterGPA(semesters[i]);
+                const subjects = semesters[i].length;
+                const credits = semesters[i].reduce((sum, subject) => sum + subject.credits, 0);
+
+                card.innerHTML = `
+                    <p class="semester-number">Semester ${i}</p>
+                    <h3 class="semester-gpa">${gpa.toFixed(2)}</h3>
+                    <div class="semester-info">
+                        <span>${subjects} subjects</span>
+                        <span>${credits.toFixed(1)} credits</span>
+                    </div>
+                `;
+                
+                grid.appendChild(card);
+            }
+        }
+
+        // Show dashboard
+        function showDashboard() {
+            dashboardView.style.display = 'block';
+            semesterView.style.display = 'none';
+            backBtn.style.display = 'none';
+            headerTitle.textContent = 'CGPA Calculator';
+            headerSubtitle.textContent = 'Track your academic progress';
+            updateDashboard();
+        }
+
+        // Show semester view
+        function showSemester(semesterNum) {
+            currentSemester = semesterNum;
+            dashboardView.style.display = 'none';
+            semesterView.style.display = 'block';
+            backBtn.style.display = 'block';
+            headerTitle.textContent = `Semester ${semesterNum}`;
+            headerSubtitle.textContent = 'Manage your subjects';
+            
+            document.getElementById('currentSemesterTitle').textContent = `Semester ${semesterNum}`;
+            updateSemesterView();
+        }
+
+        // Calculate semester GPA
+        function calculateSemesterGPA(subjects) {
+            if (subjects.length === 0) return 0;
+            
+            let totalPoints = 0;
+            let totalCredits = 0;
+            
+            subjects.forEach(subject => {
+                totalPoints += subject.grade * subject.credits;
+                totalCredits += subject.credits;
+            });
+            
+            return totalCredits > 0 ? totalPoints / totalCredits : 0;
+        }
+
+        // Calculate overall CGPA
+        function calculateCGPA() {
+            let totalPoints = 0;
+            let totalCredits = 0;
+            
+            Object.values(semesters).forEach(subjects => {
+                subjects.forEach(subject => {
+                    totalPoints += subject.grade * subject.credits;
+                    totalCredits += subject.credits;
+                });
+            });
+            
+            return totalCredits > 0 ? totalPoints / totalCredits : 0;
+        }
+
+        // Update dashboard
+        function updateDashboard() {
+            const cgpa = calculateCGPA();
+            const totalSubjects = Object.values(semesters).flat().length;
+            const totalCredits = Object.values(semesters).flat().reduce((sum, subject) => sum + subject.credits, 0);
+            const completedSemesters = Object.values(semesters).filter(subjects => subjects.length > 0).length;
+
+            document.getElementById('overallCGPA').textContent = cgpa.toFixed(2);
+            document.getElementById('totalSubjects').textContent = totalSubjects;
+            document.getElementById('totalCredits').textContent = totalCredits.toFixed(1);
+            document.getElementById('completedSemesters').textContent = completedSemesters;
+
+            generateSemesterCards();
+        }
+
+        // Update semester view
+        function updateSemesterView() {
+            const subjects = semesters[currentSemester];
+            const gpa = calculateSemesterGPA(subjects);
+            
+            document.getElementById('currentSemesterGPA').textContent = gpa.toFixed(2);
+            
+            const subjectsList = document.getElementById('subjectsList');
+            
+            if (subjects.length === 0) {
+                subjectsList.innerHTML = `
+                    <div class="empty-subjects">
+                        <h3>No subjects added yet</h3>
+                        <p>Add your first subject above</p>
+                    </div>
+                `;
+                return;
+            }
+
+            subjectsList.innerHTML = subjects.map(subject => `
+                <div class="subject-item">
+                    <div class="subject-header">
+                        <div class="subject-name">${subject.name}</div>
+                        <div class="subject-grade">${gradeLetters[subject.grade.toString()]}</div>
+                    </div>
+                    <div class="subject-details">
+                        <div class="subject-credits">${subject.credits} Credits • ${subject.grade} Points</div>
+                        <button class="remove-subject-btn" onclick="removeSubject(${subject.id})">Remove</button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // Add subject
+        subjectForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const name = document.getElementById('subjectName').value;
+            const credits = parseFloat(document.getElementById('subjectCredits').value);
+            const grade = parseFloat(document.getElementById('subjectGrade').value);
+            
+            const subject = {
+                id: subjectIdCounter++,
+                name: name,
+                credits: credits,
+                grade: grade
+            };
+            
+            semesters[currentSemester].push(subject);
+            updateSemesterView();
+            subjectForm.reset();
+        });
+
+        // Remove subject
+        function removeSubject(subjectId) {
+            semesters[currentSemester] = semesters[currentSemester].filter(subject => subject.id !== subjectId);
+            updateSemesterView();
+        }
+
+        // Initialize the app
+        initializeApp();
+    </script>
+<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'988e773c558c167a',t:'MTc1OTUxNTc1NS4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+</html>
